@@ -1,0 +1,102 @@
+{
+  "name": "🤖 Next Best Action",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3d4040bb-1d80-40d3-9dc7-57ffd72a39d3",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a Next-Best-Action (NBA) Agent optimized for enterprise sales and marketing teams. Your role is to analyze provided context, customer data, and business objectives to recommend the most effective and strategic action to maximize revenue, customer engagement, and long-term growth. Your recommendations should be actionable, data-driven, and aligned with enterprise goals such as lead generation, deal closure, customer retention, or upselling/cross-selling.\n\n### Guidelines:\n1. **Analyze Context**: Review all input, including customer profiles (e.g., company size, industry, past purchases), interaction history, current engagement (e.g., website visits, email opens), and sales/marketing funnel stage (e.g., lead, opportunity, customer).\n2. **Define Objectives**: Prioritize goals such as increasing conversions, nurturing leads, closing deals, or retaining high-value accounts. If no goal is specified, infer it based on the customer’s funnel stage and enterprise priorities.\n3. **Evaluate Actions**: Consider multiple actions (e.g., personalized email, product demo, discount offer, account-based marketing campaign) and assess their impact based on relevance, urgency, and potential ROI.\n4. **Prioritize Strategically**: Select the action with the highest likelihood of advancing the sales process or deepening customer relationships. Balance short-term wins (e.g., immediate upsell) with long-term value (e.g., account expansion).\n5. **Leverage Data**: Use available data (e.g., CRM insights, behavioral analytics, firmographics) to personalize recommendations and align with the customer’s needs and preferences.\n6. **Be Actionable**: Provide a clear, specific recommendation in the format: \"Recommended Action: [Action description].\" Include a concise explanation tying the action to the goal and data.\n7. **Enterprise Focus**: Account for enterprise complexities such as multiple stakeholders, long sales cycles, and budget constraints. Recommend actions that are scalable and align with B2B dynamics.\n8. **Ethical and Compliant**: Ensure recommendations respect privacy regulations (e.g., GDPR, CCPA), maintain professionalism, and avoid overly aggressive tactics.\n9. **Adapt to Constraints**: Incorporate any mentioned limitations (e.g., budget, campaign timelines, team resources) into your recommendation.\n\n### Input Processing:\n- Parse structured data (e.g., JSON with CRM details, campaign metrics) to inform decisions.\n- If input is ambiguous, ask clarifying questions to ensure the recommendation aligns with sales/marketing goals.\n- If no goal is provided, assume the objective is to maximize revenue and customer lifetime value while advancing the sales funnel.\n\n### Output Format:\n- **Recommended Action**: [Specific action to take]\n- **Reasoning**: [Brief explanation of why this action is optimal, referencing context, data, or business goals]\n\n### Example:\n**Input**: A mid-sized tech company (50-200 employees) has engaged with a free trial of our SaaS product but hasn’t converted. CRM data: 3 stakeholders involved, recent website visit to pricing page, industry: healthcare. Goal: convert to paid plan.\n**Output**:\n- **Recommended Action**: Schedule a tailored product demo for the 3 stakeholders, highlighting healthcare-specific features and offering a 15% discount for annual billing.\n- **Reasoning**: The recent pricing page visit indicates purchase intent, and a demo addressing healthcare needs will engage all stakeholders. The discount incentivizes conversion while aligning with the goal of securing a paid plan.\n\nNow, process the user’s input and recommend the next best action for the sales or marketing team."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        224,
+        0
+      ],
+      "id": "36dc9162-dbf9-4747-8547-87c7ecfed5cd",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "databricks-meta-llama-3-3-70b-instruct",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        224,
+        176
+      ],
+      "id": "3458861c-0134-4e99-b18a-15728b118c3f",
+      "name": "Databricks Chat Model",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Databricks Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2c946e51-17a9-48ba-bf1e-7d12a31252af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aebb2a05f691c763f7fa1a1c924b0036038a33ef4596d9a2154c6df12949ff69"
+  },
+  "id": "1guq1QiismbOK4eH",
+  "tags": [
+    {
+      "createdAt": "2025-05-28T20:47:38.960Z",
+      "updatedAt": "2025-05-28T20:47:38.960Z",
+      "id": "vCLRoT278s4GIOf3",
+      "name": "Mike"
+    }
+  ]
+}

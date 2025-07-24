@@ -1,0 +1,510 @@
+{
+  "name": "🤖 Genie",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        624
+      ],
+      "id": "d71a47ff-596f-4bb1-a648-7b884423cc6d",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "content": "# Send message to Genie and wait for response",
+        "height": 640,
+        "width": 1160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        928,
+        240
+      ],
+      "id": "e6a38725-f389-41fd-9c57-522777ac12e3",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Define Databricks params').item.json.host }}/api/2.0/genie/spaces/{{ $json.space_id }}/conversations/{{ $json.conversation_id }}/messages/{{ $json.message_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1488,
+        624
+      ],
+      "id": "0b0deee8-05ec-4187-a19c-1763f4dd2065",
+      "name": "Get Genie response",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pKOZgGvc5CYR0qHl",
+          "name": "Databricks Dogfood App PAT"
+        },
+        "httpBearerAuth": {
+          "id": "YE0OUeQOPHjNw1is",
+          "name": "Databricks Bearer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        720
+      ],
+      "id": "7b1a4dc4-7887-4f10-a3d2-2193460a6e1c",
+      "name": "Wait",
+      "webhookId": "eda61ba9-800e-45cd-b9ec-015e302eb265"
+    },
+    {
+      "parameters": {
+        "content": "# Get result table and generate natural language response",
+        "height": 620,
+        "width": 620
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2144,
+        240
+      ],
+      "id": "caefa2b8-161a-4b7d-820d-4e319087e6b5",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "model": "databricks-llama-4-maverick",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        592
+      ],
+      "id": "3a1ee445-10f1-421e-8e64-98caa8f84423",
+      "name": "Databricks Chat Model2",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ab03d536-9d58-4afa-bdbe-0f103838d8bf",
+              "name": "text",
+              "value": "={{ $json.attachments[0].text.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2544,
+        704
+      ],
+      "id": "3bbfc5d6-4b82-4f7b-ab16-977344633f68",
+      "name": "Format text output",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"host\": \"https://e2-dogfood.staging.cloud.databricks.com\",\n  \"space_id\": \"01ef032ab3001987ab6a2fb844ba2d31\",\n  \"conversation_id\": \"01f02f6062e8178ea5668458592d341a\",\n  \"text\": \"{{ $json.query }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        624
+      ],
+      "id": "4a77320f-2824-49a3-8678-15ed359e4d14",
+      "name": "Define Databricks params",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.host }}/api/2.0/genie/spaces/{{ $json.space_id }}/conversations/{{ $json.conversation_id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{{ $json.text }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1264,
+        624
+      ],
+      "id": "fd57223f-a037-42cd-a213-0e3c6a6a3450",
+      "name": "Submit Genie message",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pKOZgGvc5CYR0qHl",
+          "name": "Databricks Dogfood App PAT"
+        },
+        "httpBearerAuth": {
+          "id": "YE0OUeQOPHjNw1is",
+          "name": "Databricks Bearer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "93122887-fc3f-49b9-81ca-48217e4ba37a",
+              "leftValue": "={{ $json.attachments[0].query }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1920,
+        512
+      ],
+      "id": "2e89e486-058a-41fd-8048-a9a2d52c82ec",
+      "name": "Check response content",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "893e001f-7977-4631-9c86-f994677bd941",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        544
+      ],
+      "id": "5573f5f8-ea72-46c1-af0a-83e46716cee1",
+      "name": "Check response status",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Define Databricks params').first().json.host }}/api/2.0/genie/spaces/{{ $json.space_id }}/conversations/{{ $json.conversation_id }}/messages/{{ $json.message_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2208,
+        704
+      ],
+      "id": "f05437fd-10cc-4f55-8dde-f95aed46654c",
+      "name": "Get Genie query text only",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pKOZgGvc5CYR0qHl",
+          "name": "Databricks Dogfood App PAT"
+        },
+        "httpBearerAuth": {
+          "id": "YE0OUeQOPHjNw1is",
+          "name": "Databricks Bearer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Define Databricks params').first().json.host }}/api/2.0/genie/spaces/{{ $json.space_id }}/conversations/{{ $json.conversation_id }}/messages/{{ $json.message_id }}/attachments/{{ $json.attachments[0].attachment_id }}/query-result",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2208,
+        400
+      ],
+      "id": "0c96fc41-a90d-4393-83d5-9ab5bda087c6",
+      "name": "Get Genie query attachment1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pKOZgGvc5CYR0qHl",
+          "name": "Databricks Dogfood App PAT"
+        },
+        "httpBearerAuth": {
+          "id": "YE0OUeQOPHjNw1is",
+          "name": "Databricks Bearer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Answer this question based on the SQL query results (in JSON): \n- question: {{ $('Get Genie response').item.json.content }}\n- result description: {{ $('Get Genie response').item.json.attachments[0].query.description }}\n- result manifest: {{ $json.statement_response.manifest.toJsonString() }}\n- query result: {{ $json.statement_response.result.toJsonString() }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are given a user question with supporting data and its description and data schema. Answer the user question using provided data and metadata in an easy to digest style. Don't respond with table, rather just summarize the insights that can be obtained in the table.\n\nIf result returned empty, reply that you didn't get a query result and therefore couldn't answer the question."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        2464,
+        448
+      ],
+      "id": "102d7c25-6e87-4fa9-9625-ef55ca7487c8",
+      "name": "Summarize query attachment"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc83fad5-d1c3-4781-bc6a-68d0400b1b8a",
+              "name": "text",
+              "value": "={{ $json.text.replace(/^- /gm, \"* \").replaceAll(\"**\", \"*\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2928,
+        528
+      ],
+      "id": "60bb16a4-86bc-4465-b109-8aba3b1cc1cf",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Genie response": {
+      "main": [
+        [
+          {
+            "node": "Check response status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Genie response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Databricks Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize query attachment",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format text output": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Databricks params": {
+      "main": [
+        [
+          {
+            "node": "Submit Genie message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Genie message": {
+      "main": [
+        [
+          {
+            "node": "Get Genie response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check response content": {
+      "main": [
+        [
+          {
+            "node": "Get Genie query attachment1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Genie query text only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check response status": {
+      "main": [
+        [
+          {
+            "node": "Check response content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Genie query text only": {
+      "main": [
+        [
+          {
+            "node": "Format text output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Genie query attachment1": {
+      "main": [
+        [
+          {
+            "node": "Summarize query attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize query attachment": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Define Databricks params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bf1ac1d4-6822-41b3-8693-cae34586e597",
+  "meta": {
+    "instanceId": "aebb2a05f691c763f7fa1a1c924b0036038a33ef4596d9a2154c6df12949ff69"
+  },
+  "id": "P23sV9OBaVFpOwHH",
+  "tags": [
+    {
+      "createdAt": "2025-05-28T20:47:38.960Z",
+      "updatedAt": "2025-05-28T20:47:38.960Z",
+      "id": "vCLRoT278s4GIOf3",
+      "name": "Mike"
+    }
+  ]
+}

@@ -1,0 +1,395 @@
+{
+  "name": "✅ Databricks news social media post generator",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        864
+      ],
+      "id": "c8c8377a-9327-4463-82a8-e66c3b9505ee",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "jW5VNLJWfrfZ7nm2",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.databricks.com/en-blog-assets/data/blog/posts/all.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -288,
+        624
+      ],
+      "id": "65987052-5bd8-4210-8e72-a05018668a81",
+      "name": "HTTP Request",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ff584c66-a948-492a-9c82-d8854a351992",
+              "leftValue": "={{ $json.entityCreated.toDateTime() }}",
+              "rightValue": "={{ $now.minus(7, 'days').format('yyyy-MM-dd') }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -128,
+        624
+      ],
+      "id": "daeb724f-fe05-45f4-86a9-dfe66e697232",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "operationMode": "documentLoader",
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "summarizationMethod": "stuff",
+              "prompt": "Summarize this blog article into an informative social media post formatted for LinkedIn. The summary is targeted toward engineers who care about technical details:\n\n\"{text}\"\n\nINFORMATIVE SUMMARY:\n"
+            }
+          }
+        }
+      },
+      "id": "a47b822c-6df0-49f4-ad12-7cd2f862e116",
+      "name": "Summarization Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "position": [
+        608,
+        624
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Extract Text Only').item.json.data }}",
+        "options": {}
+      },
+      "id": "66dd55cd-d643-45bf-b32f-d13636b633b4",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        640,
+        864
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 10000,
+        "options": {}
+      },
+      "id": "87fd5978-fdea-49ad-bf58-0bb41d5f22de",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        640,
+        1040
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "data",
+              "cssSelector": "body",
+              "skipSelectors": "img,nav"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f69a53c-6ba4-40f3-8531-f8148938a550",
+      "name": "Extract Text Only",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        384,
+        624
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.entityUrl.path }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        48,
+        624
+      ],
+      "id": "229a77b9-36be-4be8-8406-8679910af287",
+      "name": "Remove Duplicates",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -464,
+        624
+      ],
+      "id": "1f199df7-3b98-4402-b491-a7d9a1ab54de",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1084864987887054919",
+          "mode": "list",
+          "cachedResultName": "🚨 Price Alerts",
+          "cachedResultUrl": "https://discord.com/channels/1084864987887054919"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1361918111883989074",
+          "mode": "list",
+          "cachedResultName": "databricks-news",
+          "cachedResultUrl": "https://discord.com/channels/1084864987887054919/1361918111883989074"
+        },
+        "content": "=",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "description": "={{ $json.response.text }}",
+              "color": "#00FF1E",
+              "timestamp": "={{ $('Filter').item.json.isoDate }}",
+              "title": "={{ $('Filter').item.json.title }}",
+              "url": "=https://www.databricks.com{{ $('Filter').item.json.entityUrl.path }}",
+              "thumbnail": "="
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        960,
+        624
+      ],
+      "id": "9114ae8d-0af5-4d1b-b34d-9f76f8467fb1",
+      "name": "Discord",
+      "executeOnce": false,
+      "webhookId": "26ac18ec-eca7-41e1-8e90-b38ca592c620",
+      "credentials": {
+        "discordBotApi": {
+          "id": "gd8U08f8Q0bBPsAt",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.databricks.com{{ $json.entityUrl.path }}",
+        "options": {}
+      },
+      "id": "6dfa7447-eb9c-4b08-b9a2-2c527b13ca3d",
+      "name": "Fetch blog html",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        208,
+        624
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "## News to social media post generator\nPeriodically checks for new blogs or articles from Databricks and generates social media content that summarizes the articles.",
+        "height": 128,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        464
+      ],
+      "id": "05db4bbd-605c-4ff0-a51f-922de3b25763",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text Only": {
+      "main": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Fetch blog html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "main": [
+        []
+      ]
+    },
+    "Summarization Chain": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch blog html": {
+      "main": [
+        [
+          {
+            "node": "Extract Text Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c9e786be-a9a1-4470-8a5d-8212489b19e3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aebb2a05f691c763f7fa1a1c924b0036038a33ef4596d9a2154c6df12949ff69"
+  },
+  "id": "PVD90bzRYZHP5ehp",
+  "tags": [
+    {
+      "createdAt": "2025-05-28T20:47:38.960Z",
+      "updatedAt": "2025-05-28T20:47:38.960Z",
+      "id": "vCLRoT278s4GIOf3",
+      "name": "Mike"
+    }
+  ]
+}

@@ -1,0 +1,476 @@
+{
+  "name": "✅ Databricks Apps Knowledge Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput || $json.blocks[0].elements[0].elements[1].text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        3680,
+        1504
+      ],
+      "id": "b1cc92bb-e995-47d0-9a22-396e03c41bc5",
+      "name": "Databricks Apps KA chain"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.chatInput || $json.blocks[0].elements[0].elements[1].text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "for PM",
+              "description": "Questions related to product, product strategy, or roadmap that can be answered by product managers"
+            },
+            {
+              "category": "for engineer",
+              "description": "Questions related to engineering, backend, or bugs that can be answered by engineers or tech leads"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        3680,
+        1808
+      ],
+      "id": "ff966392-9b8b-4e6f-b281-28fc0cc4c015",
+      "name": "Contact Router"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d98505f9-8a14-484f-8fed-2f5613badd72",
+              "name": "text",
+              "value": "Hey [@Justin](mailto:justin@databricks.com), this seems like a product-related question. Can you help with this? ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4064,
+        1712
+      ],
+      "id": "84aa5e4f-b8d5-4f6d-9775-8d64c6d0d466",
+      "name": "Tag PM",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d98505f9-8a14-484f-8fed-2f5613badd72",
+              "name": "text",
+              "value": "Hey sorry I don't know how to help you with that. Can you elaborate?",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4064,
+        2080
+      ],
+      "id": "bbb5f14d-655e-4360-9845-d2dad6aa26dc",
+      "name": "Message I don't know",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.chatInput || $json.blocks[0].elements[0].elements[1].text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "question",
+              "description": "a question to be answered by the bot"
+            },
+            {
+              "category": "ask for help",
+              "description": "ask a user in the channel for help"
+            }
+          ]
+        },
+        "options": {
+          "fallback": "other",
+          "systemPromptTemplate": "You are a question router that will classify and pass user's question to other appropriate agents to respond. Other agents are\n- Databricks Apps Q&A bot that can answer frequently asked product and technical questions about Databricks Apps\n- Contact router that tags PMs or tech leads for help\n- For questions unrelated to Databricks Apps, will respond I don't know\n\nPlease classify the text provided by the user into one of the following categories: {categories}, and use the provided formatting instructions below. Don't explain, and only output the json."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        3312,
+        1808
+      ],
+      "id": "27270973-a0ef-4068-a4cd-8f762c4005f5",
+      "name": "Orchestrator Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.text = item.json.text.replace(/\\[\\^\\w*-(\\d+)\\]/g, \"[$1]\");\n  item.json.text = item.json.text.replace(/\\[(\\d+)\\]:/g, \"\\n[$1]:\");\n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4064,
+        1504
+      ],
+      "id": "2fd2e07d-ae46-4f2d-8a08-3afc7e9f61e9",
+      "name": "Clean output"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d98505f9-8a14-484f-8fed-2f5613badd72",
+              "name": "text",
+              "value": "Hey [@Andre](mailto:andre@databricks.com), this seems like a engineering-related question. Can you help with this? ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4064,
+        1904
+      ],
+      "id": "06b29079-338f-416f-b20e-a2b4f4c25614",
+      "name": "Tag Tech Lead",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "model": "ep-gpt4o-new",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        3312,
+        2016
+      ],
+      "id": "9d31d608-42c8-4215-a792-cc9140ef707d",
+      "name": "OpenAI 4o",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "ep-gpt4o-mini",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        3680,
+        1984
+      ],
+      "id": "cd246792-18f0-4647-b914-ceeec7ea6084",
+      "name": "OpenAI 4o-mini",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "app_mention"
+        ],
+        "channelId": {
+          "__rl": true,
+          "value": "C083XM2C0V8",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        3120,
+        1824
+      ],
+      "id": "7debcb04-fc0b-40e0-8bda-c7cbfed398d2",
+      "name": "Slack chatbot",
+      "webhookId": "6cba0e39-fc95-478f-84c6-5bcfaf36c3d1",
+      "credentials": {
+        "slackApi": {
+          "id": "mYzrc4ZcwWLaGGOG",
+          "name": "Slack DbxAppsBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C083XM2C0V8",
+          "mode": "id"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $('Slack chatbot').item.json.ts }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        4272,
+        1808
+      ],
+      "id": "20fa27f3-548b-4e38-a2d7-4204ffa6c89a",
+      "name": "Respond",
+      "webhookId": "c47a6a10-6ece-49d5-98b9-ceddb01732c5",
+      "notesInFlow": true,
+      "credentials": {
+        "slackApi": {
+          "id": "mYzrc4ZcwWLaGGOG",
+          "name": "Slack DbxAppsBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "ka-84885690-endpoint",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        3680,
+        1680
+      ],
+      "id": "68b33bfd-e3cd-42a2-a0ee-50ae21995804",
+      "name": "Databricks Apps doc agent (KA)",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "👈 canned messages for tagging individuals. Can be replaced by more customized messages or additional functionalities, etc.",
+        "height": 80,
+        "width": 352
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4256,
+        2000
+      ],
+      "id": "f00920bd-73a2-4bac-a1a0-4160a5881f5f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Product knowledge assistant agent\nAnswer questions about a product using official documentations, built using Agent Bricks.",
+        "height": 80,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2960,
+        1664
+      ],
+      "id": "8e47bbe5-312b-4eee-b2a3-e134980455b3",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Databricks Apps KA chain": {
+      "main": [
+        [
+          {
+            "node": "Clean output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contact Router": {
+      "main": [
+        [
+          {
+            "node": "Tag PM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tag Tech Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag PM": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message I don't know": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Agent": {
+      "main": [
+        [
+          {
+            "node": "Databricks Apps KA chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Contact Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message I don't know",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean output": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Tech Lead": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI 4o": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI 4o-mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Contact Router",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack chatbot": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Databricks Apps doc agent (KA)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Databricks Apps KA chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b0ea7ca4-d30e-43c2-9927-308381c682c8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aebb2a05f691c763f7fa1a1c924b0036038a33ef4596d9a2154c6df12949ff69"
+  },
+  "id": "dUXU4X6S9nc6DpGk",
+  "tags": [
+    {
+      "createdAt": "2025-05-28T20:47:38.960Z",
+      "updatedAt": "2025-05-28T20:47:38.960Z",
+      "id": "vCLRoT278s4GIOf3",
+      "name": "Mike"
+    }
+  ]
+}

@@ -1,0 +1,571 @@
+{
+  "name": "✅ Customer support multi-agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput || $json.blocks[0].elements[0].elements[1].text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        336,
+        0
+      ],
+      "id": "4428d722-0350-4e08-bb86-f39eac1eb2f4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rule": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4d96e50f-a36e-44ba-9427-311d8e369736",
+                    "leftValue": true,
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.modelSelector",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        224
+      ],
+      "id": "d8f631d0-326e-48f1-b329-ff27c26aac8a",
+      "name": "Model Selector"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to create an issue in Jira Software. In the response, include the URL to the Jira that's created.",
+        "project": {
+          "__rl": true,
+          "value": "10001",
+          "mode": "list",
+          "cachedResultName": "Support"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10005",
+          "mode": "list",
+          "cachedResultName": "Submit a request or incident"
+        },
+        "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        272,
+        224
+      ],
+      "id": "1068f381-61a0-4569-ba78-9889c0a7fae8",
+      "name": "Create an issue in Jira Software",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "rdFhlODThVlU1yyg",
+          "name": "Jira demo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "ep-gpt4o-new",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        400
+      ],
+      "id": "7374163d-a179-4af1-b4a0-4f48d8d92005",
+      "name": "GPT 4o",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to get an issue in Jira Software, given an issue ID.",
+        "operation": "get",
+        "issueKey": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Key', ``, 'string') }}",
+        "simplifyOutput": "",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        416,
+        224
+      ],
+      "id": "8387005c-0bdc-458b-b273-84954a3fa810",
+      "name": "Get an issue in Jira Software",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "rdFhlODThVlU1yyg",
+          "name": "Jira demo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "issueKey": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Key', ``, 'string') }}",
+        "updateFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        704,
+        224
+      ],
+      "id": "81ec9531-de1b-476c-8afb-c513c05df0a7",
+      "name": "Update an issue in Jira Software",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "rdFhlODThVlU1yyg",
+          "name": "Jira demo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "issueComment",
+        "issueKey": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Key', ``, 'string') }}",
+        "comment": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Comment', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        560,
+        224
+      ],
+      "id": "86838dff-1df8-4051-aa01-423339282fc7",
+      "name": "Add a comment in Jira Software",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "rdFhlODThVlU1yyg",
+          "name": "Jira demo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "databricks-meta-llama-3-3-70b-instruct",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        400
+      ],
+      "id": "38df1b4c-7df7-4f6b-9feb-f88082103ebc",
+      "name": "Llama 3",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C083XM2C0V8",
+          "mode": "id"
+        },
+        "text": "={{ $json.output }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $('Slack chatbot').item.json.ts }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        736,
+        0
+      ],
+      "id": "3cc9d1a3-d693-448d-a480-9cbb472f25fb",
+      "name": "Respond",
+      "webhookId": "c47a6a10-6ece-49d5-98b9-ceddb01732c5",
+      "notesInFlow": true,
+      "credentials": {
+        "slackApi": {
+          "id": "mYzrc4ZcwWLaGGOG",
+          "name": "Slack DbxAppsBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "app_mention"
+        ],
+        "channelId": {
+          "__rl": true,
+          "value": "C083XM2C0V8",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        128,
+        0
+      ],
+      "id": "056ed250-9be1-498c-9d65-e9a45e19af1a",
+      "name": "Slack chatbot",
+      "webhookId": "c0a7c0b1-f061-46bb-8ce0-2c70a0a5dc19",
+      "credentials": {
+        "slackApi": {
+          "id": "mYzrc4ZcwWLaGGOG",
+          "name": "Slack DbxAppsBot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search the internet for the latest information about a particular topic.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "topic",
+              "value": "news"
+            },
+            {
+              "name": "time_range",
+              "value": "year"
+            },
+            {
+              "name": "include_answer",
+              "value": "advanced"
+            }
+          ]
+        },
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "answer"
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        400
+      ],
+      "id": "45048560-982f-493b-8a89-c3482d756891",
+      "name": "Tavily web search",
+      "notesInFlow": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "1t6ehwmVHrUj6pCv",
+          "name": "Tavily Bearer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to answer questions about gtm and sales questions, especially about sales opportunities in accounts.",
+        "method": "POST",
+        "url": "https://e2-dogfood.staging.cloud.databricks.com/serving-endpoints/mas-cb6d12b8-endpoint/invocations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"input\":[{\"role\":\"user\",\"content\":\"{{ $json.chatInput || $('Slack chatbot').item.json.text }}\"}]}",
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "output",
+        "fieldsToInclude": "selected",
+        "fields": "content"
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        400
+      ],
+      "id": "94378cc2-cdd6-4e59-bdcb-2658c5942f39",
+      "name": "Account opps agent (MAS)",
+      "notesInFlow": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "YE0OUeQOPHjNw1is",
+          "name": "Databricks Bearer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to answer questions about databricks apps using official documentation",
+        "method": "POST",
+        "url": "https://e2-dogfood.staging.cloud.databricks.com/serving-endpoints/ka-84885690-endpoint/invocations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"input\":[{\"role\":\"user\",\"content\":\"{{ $json.chatInput || $('Slack chatbot').item.json.text }}\"}],\"databricks_options\":{\"conversation_id\":\"63db8974-0875-4b57-a838-a84c7f056820\",\"return_trace\":true},\"context\":{\"conversation_id\":\"63db8974-0875-4b57-a838-a84c7f056820\",\"user_id\":\"mike.lo@databricks.com\"}}",
+        "options": {},
+        "optimizeResponse": true,
+        "dataField": "output",
+        "fieldsToInclude": "selected",
+        "fields": "content"
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        256,
+        400
+      ],
+      "id": "b821ac1e-82c1-4e67-b7be-e9fec1169c0d",
+      "name": "Databricks Apps docs agent (KA)",
+      "notesInFlow": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "YE0OUeQOPHjNw1is",
+          "name": "Databricks Bearer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "👆 Agent Bricks: [knowledge assistant](https://docs.databricks.com/aws/en/generative-ai/agent-bricks/knowledge-assistant), and [multi-agent supervisor](https://docs.databricks.com/aws/en/generative-ai/agent-bricks/multi-agent-supervisor). These use HTTP node because the response is in OpenAI's [Responses API](https://platform.openai.com/docs/api-reference/responses) format, which differs from the [Chat Completion](https://platform.openai.com/docs/api-reference/chat) format.",
+        "height": 80,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        544
+      ],
+      "id": "54a10e84-95a8-4376-8992-3ba548e9f19f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Customer support multi-agent chatbot \nMain supervisor agent can use Jira API to manipulate support tickets, browse the web, or call Databricks Genie to answer questions about account opportunities, and retrieve documentations using knowledge assistant. Built using Agent Bricks. ",
+        "height": 96,
+        "width": 816
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -144
+      ],
+      "id": "568ec64a-40da-459a-af8c-a93dcae30728",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Model Selector": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an issue in Jira Software": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT 4o": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Model Selector",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an issue in Jira Software": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an issue in Jira Software": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add a comment in Jira Software": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Llama 3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Model Selector",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack chatbot": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily web search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Account opps agent (MAS)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Databricks Apps docs agent (KA)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c46f4232-fe73-4549-825d-b0b54ab2914a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aebb2a05f691c763f7fa1a1c924b0036038a33ef4596d9a2154c6df12949ff69"
+  },
+  "id": "exuvrRyKHLdWHJKH",
+  "tags": []
+}

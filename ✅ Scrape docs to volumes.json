@@ -1,0 +1,204 @@
+{
+  "name": "✅ Scrape docs to volumes",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        448
+      ],
+      "id": "85f7b52a-8f32-4861-b294-70dd611bf5d2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        448
+      ],
+      "id": "f02c6a0b-1dbe-4a10-a605-9a244267c4db",
+      "name": "Crawl doc websites",
+      "notesInFlow": true,
+      "credentials": {
+        "tavilyApi": {
+          "id": "Pvo1WglWEiC5Puwn",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().flatMap(item => item.json.results.map(result => ({ json: result })));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        448
+      ],
+      "id": "4df95e93-b7cd-4757-b5da-5ae7c1e3c70b",
+      "name": "Flatmap results"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        48,
+        448
+      ],
+      "id": "12a18788-dfd0-4721-af8d-2accf7f8ade2",
+      "name": "Loop over docs"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "raw_content",
+        "options": {
+          "fileName": "={{ $json.url.split('/').last().replaceAll('#', '-') }}.txt"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        560
+      ],
+      "id": "d6a123f3-cd92-4ac7-981e-56313d639cf1",
+      "name": "Convert to File",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "resource": "files",
+        "operation": "uploadFile",
+        "catalog": "yhl",
+        "schema": "knowledge_assistant",
+        "volume": "databricks-aibi-docs",
+        "path": "={{ $binary.data.fileName }}",
+        "additionalFields": {
+          "overwrite": true
+        }
+      },
+      "type": "n8n-nodes-databricks.databricks",
+      "typeVersion": 1,
+      "position": [
+        448,
+        560
+      ],
+      "id": "9df49611-60a4-43c0-a3b2-1286eeec2da0",
+      "name": "Upload file to Volume",
+      "notesInFlow": true,
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Crawl and upload documentation content to UC volumes \nUses (https://www.npmjs.com/package/@tavily/n8n-nodes-tavily).",
+        "height": 96,
+        "width": 736
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        304
+      ],
+      "id": "2df2ff6f-d5e4-453e-addc-dc14b31610a4",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Crawl doc websites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crawl doc websites": {
+      "main": [
+        [
+          {
+            "node": "Flatmap results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flatmap results": {
+      "main": [
+        [
+          {
+            "node": "Loop over docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop over docs": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload file to Volume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file to Volume": {
+      "main": [
+        [
+          {
+            "node": "Loop over docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b96c9496-c58b-448c-bd49-748dc05bfbde",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aebb2a05f691c763f7fa1a1c924b0036038a33ef4596d9a2154c6df12949ff69"
+  },
+  "id": "BfwL6oqNcvPZ3H07",
+  "tags": []
+}

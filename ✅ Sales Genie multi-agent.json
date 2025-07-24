@@ -1,0 +1,374 @@
+{
+  "name": "✅ Sales Genie multi-agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.modelSelector",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        672
+      ],
+      "id": "ad42b219-269b-4b45-bec8-1deb8bdcb398",
+      "name": "Model Selector"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Receive Slack message').first().json.blocks[0].elements[0].elements[1].text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        464
+      ],
+      "id": "2a318ba5-8f03-4990-ab81-7cf36da52a4f",
+      "name": "Genie Multi-agent"
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "app_mention"
+        ],
+        "watchWorkspace": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        464
+      ],
+      "id": "08aafbe8-bcf3-4ab5-8e52-cdb7672ebd8d",
+      "name": "Receive Slack message",
+      "webhookId": "5686c6f0-f248-4929-9e5a-d155c78eb667",
+      "credentials": {
+        "slackApi": {
+          "id": "ZwGHlLFkfoZONFJO",
+          "name": "Slack GenieMultiAgent"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C083XM2C0V8",
+          "mode": "id"
+        },
+        "text": "={{ $json.output.replace(/^- /gm, \"* \").replaceAll(\"**\", \"*\") }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $('Receive Slack message').first().json.ts }}"
+            }
+          },
+          "mrkdwn": true
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2064,
+        464
+      ],
+      "id": "df085c98-7ace-4d6f-9c75-dc288d37fea2",
+      "name": "Send Genie response",
+      "webhookId": "9b164ec1-f2d6-4ac0-a3da-fb6fb4130cad",
+      "notesInFlow": true,
+      "credentials": {
+        "slackApi": {
+          "id": "ZwGHlLFkfoZONFJO",
+          "name": "Slack GenieMultiAgent"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "This is an analyst tool. Call this tool to perform analysis on customer sales opportunities and customer revenue history and answer user questions.",
+        "workflowId": {
+          "__rl": true,
+          "value": "P23sV9OBaVFpOwHH",
+          "mode": "list",
+          "cachedResultName": "🤖 Genie"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        672
+      ],
+      "id": "135a7653-b7ee-4bdc-b814-badd4be0ba7f",
+      "name": "Genie"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to recommend the most effective and contextually appropriate action to achieve a specific goal, particularly in sales, marketing, customer service, or operational contexts. It analyzes contextual data, user inputs, and business objectives to deliver a single, actionable recommendation that maximizes outcomes such as revenue, customer engagement, or process efficiency.",
+        "workflowId": {
+          "__rl": true,
+          "value": "1guq1QiismbOK4eH",
+          "mode": "list",
+          "cachedResultName": "🤖 Next Best Action"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        672
+      ],
+      "id": "7e3ddd3c-a945-4e3b-8104-38094574a5ae",
+      "name": "Next Best Action"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Call this tool to search the internet for information on the topic at hand.",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "max_results",
+              "value": "5"
+            },
+            {
+              "name": "time_range",
+              "value": "week"
+            },
+            {
+              "name": "include_answer",
+              "value": "basic"
+            },
+            {
+              "name": "topic",
+              "value": "news"
+            },
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters4_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        2032,
+        672
+      ],
+      "id": "9cb62a6f-13b1-41da-95c1-97d052c57318",
+      "name": "Web Search",
+      "notesInFlow": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "1t6ehwmVHrUj6pCv",
+          "name": "Tavily Bearer Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "databricks-meta-llama-3-3-70b-instruct",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        832
+      ],
+      "id": "b123f04b-68ad-454c-acd0-455cd2f6c614",
+      "name": "Llama 3 70B",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "databricks-gemini-2-5-pro",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        832
+      ],
+      "id": "87e0180b-fb5c-4382-8aae-bbe749f0659a",
+      "name": "Gemini 2.5 Pro",
+      "credentials": {
+        "databricks": {
+          "id": "MAOAlJt5iame2R3B",
+          "name": "Databricks Dogfood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "👆 Main agent can call Genie and another LLM to ask about account opportunities or get recommendations for next best action. Note that these are actually sub workflows that can be used as tools.",
+        "height": 96,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        816
+      ],
+      "id": "ca1372f2-4d39-4aa4-b8f4-32b542624d4b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Genie multi-agent\nMain supervisor agent can call Genie Space, tools such as (Tavily) web search, and get recommendations on next best actions, something that's useful for sales teams reviewing account activities.",
+        "height": 128,
+        "width": 688
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        288
+      ],
+      "id": "b0c961cd-9a3d-419a-8eb5-a723188db41b",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Model Selector": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Genie Multi-agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Genie Multi-agent": {
+      "main": [
+        [
+          {
+            "node": "Send Genie response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Slack message": {
+      "main": [
+        [
+          {
+            "node": "Genie Multi-agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Genie": {
+      "ai_tool": [
+        [
+          {
+            "node": "Genie Multi-agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Next Best Action": {
+      "ai_tool": [
+        [
+          {
+            "node": "Genie Multi-agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Genie Multi-agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Llama 3 70B": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Model Selector",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Pro": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Model Selector",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "277fc17a-cdfd-4730-b973-73716f01827d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aebb2a05f691c763f7fa1a1c924b0036038a33ef4596d9a2154c6df12949ff69"
+  },
+  "id": "MK8Sa3HqpufuuHY2",
+  "tags": [
+    {
+      "createdAt": "2025-05-28T20:47:38.960Z",
+      "updatedAt": "2025-05-28T20:47:38.960Z",
+      "id": "vCLRoT278s4GIOf3",
+      "name": "Mike"
+    }
+  ]
+}
