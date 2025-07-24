@@ -1,2 +1,2 @@
 # n8n-databricks-workflows
-This repository contains example workflows that use Databricks features in n8n
+This repository contains example n8n workflows that use Databricks features.
